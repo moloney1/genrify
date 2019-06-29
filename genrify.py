@@ -28,4 +28,4 @@ def dump_tags(mp3file):
 	print(md.tags)
 
 edit_genre(sys.argv[1], "Classical")
-dump_tags(sys.argv[1])
+#dump_tags(sys.argv[1])
