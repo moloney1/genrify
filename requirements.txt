@@ -1,0 +1,4 @@
+mutagen==1.42.0
+pathlib==1.0.1
+python-magic==0.4.15
+six==1.12.0
