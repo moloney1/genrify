@@ -9,4 +9,4 @@ When you download an album it tends to have really vague genre tags. For example
 This renders queuing/playing songs by genre mostly useless.
 
 ## Solution
-This tool uses the [mutagen](https://mutagen.readthedocs.io/en/latest/) library to find a track's metadata, and asks the [Last.fm API](https://www.last.fm/api/) what genres it's most commonly tagged at. It then sets the genre tag to the most common one (interactive choosing to be added).
+This tool uses the [mutagen](https://mutagen.readthedocs.io/en/latest/) library to find a track's metadata, and asks the [Last.fm API](https://www.last.fm/api/) what genres it's most commonly tagged as. It then sets the genre tag to the most common one (interactive choosing to be added).
