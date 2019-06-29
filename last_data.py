@@ -9,8 +9,6 @@ BASE_URL = "http://ws.audioscrobbler.com/2.0/"
 
 pp = pprint.PrettyPrinter(indent=4)
 
-
-
 def base_request():
 	payload =  {
 		"method": "album.gettoptags",
@@ -44,10 +42,4 @@ if __name__ == "__main__":
 
 	tags = get_top_tags(args.artist, args.album)
 	print(tags)
-
-	
-
-
-
-
 
