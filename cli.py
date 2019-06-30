@@ -9,6 +9,13 @@ import last_data
 def is_mp3_file(f):
 	return magic.from_file(f, mime=True) == "audio/mpeg"
 
+def get_genre_choice(genres):
+	print(f"Choose a genre for {artist} - {album}:")
+	# start numbering at one for better friendliness
+	for i, choice in enumerate(genres, 1):
+		print(f"[{i}]: {choice}")
+	return genres[int(input(" > ")) - 1] # account for indexing
+
 parser = argparse.ArgumentParser(description="Genre setter")
 parser.add_argument("library")
 parser.add_argument("--last-fm", action="store_true")
@@ -26,15 +33,9 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 			if not album in genre_lookup:
 				genres = last_data.get_top_tags(artist, album)
 				if args.interactive:
-					print(f"Choose a genre for {artist} - {album}:")
-					for i, choice in enumerate(genres, 1):
-						print(f"[{i}: {choice}]")
-					genre = genres[int(input(" > ")) - 1]
-
-					pass
+					genre = get_genre_choice(genres)
 				else:
-					genre = genres[0] # TODO allow interactive choosing || manual override etc
-
+					genre = genres[0] 
 				genrify.edit_genre(path, genre)
 				genre_lookup[album] = genre
 			else:
