@@ -14,12 +14,22 @@ def get_genre_choice(genres):
 	# start numbering at one for better friendliness
 	for i, choice in enumerate(genres, 1):
 		print(f"[{i}]: {choice}")
-	return genres[int(input(" > ")) - 1] # account for indexing
+	print(f"[{len(genres) + 1}]: Tag manually")
+	
+	choice = int(input(" > "))
+	if choice == len(genres) + 1:
+		return get_manual_genre_input()
+	else:
+		return genres[choice - 1] # account for indexing
+
+def get_manual_genre_input():
+	print("Tag this album manually:")
+	return str(input(" > "))
 
 parser = argparse.ArgumentParser(description="Genre setter")
 parser.add_argument("library")
-parser.add_argument("--last-fm", action="store_true")
 parser.add_argument("--interactive", "-i", action="store_true")
+# TODO add option to skip last.fm querying
 args = parser.parse_args()
 print(args)
 
@@ -36,6 +46,7 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 					genre = get_genre_choice(genres)
 				else:
 					genre = genres[0] 
+
 				genrify.edit_genre(path, genre)
 				genre_lookup[album] = genre
 			else:
