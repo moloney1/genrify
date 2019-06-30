@@ -10,7 +10,6 @@ def is_mp3_file(f):
 	return magic.from_file(f, mime=True) == "audio/mpeg"
 
 def get_genre_choice(genres):
-	print(f"Choose a genre for {artist} - {album}:")
 	# start numbering at one for better friendliness
 	for i, choice in enumerate(genres, 1):
 		print(f"[{i}]: {choice}")
@@ -18,18 +17,18 @@ def get_genre_choice(genres):
 	
 	choice = int(input(" > "))
 	if choice == len(genres) + 1:
+		print("Tag this album manually:")
 		return get_manual_genre_input()
 	else:
 		return genres[choice - 1] # account for indexing
 
 def get_manual_genre_input():
-	print("Tag this album manually:")
 	return str(input(" > "))
 
 parser = argparse.ArgumentParser(description="Genre setter")
 parser.add_argument("library")
 parser.add_argument("--interactive", "-i", action="store_true")
-# TODO add option to skip last.fm querying
+parser.add_argument("--nolastfm", "-n", action="store_true")
 args = parser.parse_args()
 print(args)
 
@@ -41,11 +40,18 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 		if is_mp3_file(path):
 			artist, _, album = genrify.get_current_data(path)
 			if not album in genre_lookup:
-				genres = last_data.get_top_tags(artist, album)
-				if args.interactive:
-					genre = get_genre_choice(genres)
+				if not args.nolastfm:
+					# get top tags from last.fm
+					genres = last_data.get_top_tags(artist, album)
+					if args.interactive:
+						print(f"Choose a genre for {artist} - {album}:")
+						genre = get_genre_choice(genres)
+					else:
+						genre = genres[0] 
 				else:
-					genre = genres[0] 
+					# skip last.fm query and get manual input
+					print(f"Choose a genre for {artist} - {album}:")
+					genre = get_manual_genre_input()
 
 				genrify.edit_genre(path, genre)
 				genre_lookup[album] = genre
