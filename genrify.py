@@ -1,39 +1,62 @@
-import sys
+import os
+import argparse
 
-import mutagen.mp3
+import magic
 
-# param mp3file - path of mp3file
-# param genre - str containing genre to edit to 
-def edit_genre(mp3file, genre):
-	md = mutagen.mp3.EasyMP3(mp3file)
-	artist, title, _ = get_current_data(md)
+import tag_edit
+import last_data
 
-	try:
-		cur_gen = md.tags["genre"][0]
-		md.tags["genre"] = genre
-		print(f"{artist}-{title}: genre changed from {cur_gen} to {genre}")
-	except:
-		md.tags["genre"] = genre
-		print("No genre found for {artist}-{title}")
-		print("Added genre tag: {genre}")
-	md.save()
+def is_mp3_file(f):
+	return magic.from_file(f, mime=True) == "audio/mpeg"
 
-def get_current_data(md):
-	if isinstance(md, str):
-		md = mutagen.mp3.EasyMP3(md)
-	try:
-		return (md.tags["artist"][0], 
-				md.tags["title"][0],
-				md.tags["album"][0])
-	except:
-		raise Exception('File missing essential information.')
+def get_genre_choice(genres):
+	# start numbering at one for better friendliness
+	for i, choice in enumerate(genres, 1):
+		print(f"[{i}]: {choice}")
+	print(f"[{len(genres) + 1}]: Tag manually")
 	
-def dump_tags(mp3file):
-	md = mutagen.mp3.EasyMP3(mp3file)
-	print(md.tags)
+	choice = int(input(" > "))
+	if choice == len(genres) + 1:
+		print("Tag this album manually:")
+		return get_manual_genre_input()
+	else:
+		return genres[choice - 1] # account for indexing
 
-if __name__ == "__main__":
-	#edit_genre(sys.argv[1], "Classical")
-	dump_tags(sys.argv[1])
-	#md = mutagen.mp3.EasyMP3("TestAlbum/Gone.mp3")
-	#print(get_current_data(md))
+def get_manual_genre_input():
+	return str(input(" > "))
+
+parser = argparse.ArgumentParser(description="Genre setter")
+parser.add_argument("library")
+parser.add_argument("--interactive", "-i", action="store_true")
+parser.add_argument("--nolastfm", "-n", action="store_true")
+args = parser.parse_args()
+print(args)
+
+genre_lookup = {}
+for root, dirs, files in os.walk(args.library, topdown=False):
+	for name in files:
+		path = os.path.join(root, name)
+		# print(f"{path} - {is_mp3_file(path)}")
+		if is_mp3_file(path):
+			artist, _, album = tag_edit.get_current_data(path)
+			if not album in genre_lookup:
+				if not args.nolastfm:
+					# get top tags from last.fm
+					genres = last_data.get_top_tags(artist, album)
+					if args.interactive:
+						print(f"Choose a genre for {artist} - {album}:")
+						genre = get_genre_choice(genres)
+					else:
+						genre = genres[0] 
+				else:
+					# skip last.fm query and get manual input
+					print(f"Choose a genre for {artist} - {album}:")
+					genre = get_manual_genre_input()
+
+				tag_edit.edit_genre(path, genre)
+				genre_lookup[album] = genre
+			else:
+				tag_edit.edit_genre(path, genre_lookup[album])	
+				print(album)
+
+
