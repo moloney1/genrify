@@ -29,7 +29,9 @@ parser = argparse.ArgumentParser(description="Genre setter")
 parser.add_argument("library")
 parser.add_argument("--interactive", "-i", action="store_true")
 parser.add_argument("--nolastfm", "-n", action="store_true")
+parser.add_argument("--limit", "-l", nargs=1)
 args = parser.parse_args()
+
 print(args)
 
 genre_lookup = {}
@@ -41,8 +43,11 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 			artist, _, album = tag_edit.get_current_data(path)
 			if not album in genre_lookup:
 				if not args.nolastfm:
+					# limit how many selections to display 
+					# only relevant for interactive mode
+					limit = 5 if not args.limit else int(args.limit[0])
 					# get top tags from last.fm
-					genres = last_data.get_top_tags(artist, album)
+					genres = last_data.get_top_tags(artist, album, limit=limit)
 					if args.interactive:
 						print(f"Choose a genre for {artist} - {album}:")
 						genre = get_genre_choice(genres)
