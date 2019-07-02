@@ -41,6 +41,12 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 		# print(f"{path} - {is_mp3_file(path)}")
 		if is_mp3_file(path):
 			artist, _, album = tag_edit.get_current_data(path)
+
+			# skip this file if it is missing necessary tags
+			if artist == None or album == None:
+				print("Skipping {name} due to missing essential information.")
+				continue
+
 			if not album in genre_lookup:
 				if not args.nolastfm:
 					# limit how many selections to display 

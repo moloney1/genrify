@@ -31,7 +31,7 @@ def get_top_tags(artist, album, limit=5):
 	limit = min(len(toptags), limit)
 	tags = []
 	for i in range(0, limit):
-		tags.append(toptags[i]["name"].title())
+		tags.append(toptags[i]["name"].title()) # return in Title Case
 	return tags
 
 if __name__ == "__main__":

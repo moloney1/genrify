@@ -1,12 +1,13 @@
 import sys
+import warnings
 
 import mutagen.mp3
 
 # param mp3file - path of mp3file
 # param genre - str containing genre to edit to 
 def edit_genre(mp3file, genre):
+	artist, title, _ = get_current_data(mp3file)
 	md = mutagen.mp3.EasyMP3(mp3file)
-	artist, title, _ = get_current_data(md)
 
 	try:
 		cur_gen = md.tags["genre"][0]
@@ -18,15 +19,17 @@ def edit_genre(mp3file, genre):
 		print("Added genre tag: {genre}")
 	md.save()
 
-def get_current_data(md):
-	if isinstance(md, str):
-		md = mutagen.mp3.EasyMP3(md)
+# take file path as param instead of EasyMP3 object
+# so that we can give appropriate warning on failure
+def get_current_data(mp3file):
+	md = mutagen.mp3.EasyMP3(mp3file)
 	try:
 		return (md.tags["artist"][0], 
 				md.tags["title"][0],
 				md.tags["album"][0])
 	except:
-		raise Exception('File missing essential information.')
+		warnings.warn(f"File {mp3file} is missing tags.")
+		return (None, None, None)
 	
 def dump_tags(mp3file):
 	md = mutagen.mp3.EasyMP3(mp3file)
