@@ -11,12 +11,14 @@ def edit_genre(mp3file, genre):
 
 	try:
 		cur_gen = md.tags["genre"][0]
-		md.tags["genre"] = genre
-		print(f"{artist}-{title}: genre changed from {cur_gen} to {genre}")
+		if cur_gen == genre:
+			print(f"{artist}-{title} already tagged {genre}. No action taken")
+		else:
+			md.tags["genre"] = genre
+			print(f"{artist}-{title}: genre changed from {cur_gen} to {genre}")
 	except:
 		md.tags["genre"] = genre
-		print("No genre found for {artist}-{title}")
-		print("Added genre tag: {genre}")
+		print("No genre found for {artist}-{title}. Added genre tag: {genre}")
 	md.save()
 
 # take file path as param instead of EasyMP3 object

@@ -55,6 +55,7 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 					# get top tags from last.fm
 					genres = last_data.get_top_tags(artist, album, limit=limit)
 					if args.interactive:
+						print()
 						print(f"Choose a genre for {artist} - {album}:")
 						genre = get_genre_choice(genres)
 					else:
@@ -68,6 +69,6 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 				genre_lookup[album] = genre
 			else:
 				tag_edit.edit_genre(path, genre_lookup[album])	
-				print(album)
+
 
 
