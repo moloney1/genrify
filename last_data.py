@@ -27,6 +27,9 @@ def get_top_tags(artist, album, limit=5):
 	})
 	req = requests.get(BASE_URL, params=payload)
 	data = req.json()
+	if "error" in data:
+		print(f"Error finding tags for {artist}-{album}: {data['message']}")
+		return None
 	toptags = data["toptags"]["tag"]
 	limit = min(len(toptags), limit)
 	tags = []

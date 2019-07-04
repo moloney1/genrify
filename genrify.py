@@ -44,7 +44,7 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 
 			# skip this file if it is missing necessary tags
 			if artist == None or album == None:
-				print("Skipping {name} due to missing essential information.")
+				print(f"Skipping {name} due to missing essential information.")
 				continue
 
 			if not album in genre_lookup:
@@ -54,12 +54,18 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 					limit = 5 if not args.limit else args.limit
 					# get top tags from last.fm
 					genres = last_data.get_top_tags(artist, album, limit=limit)
+
+					if genres == None:
+						print(f"Skipping {name}: no tags available")
+						continue
+
 					if args.interactive:
 						print()
 						print(f"Choose a genre for {artist} - {album}:")
 						genre = get_genre_choice(genres)
 					else:
 						genre = genres[0] 
+
 				else:
 					# skip last.fm query and get manual input
 					print(f"Choose a genre for {artist} - {album}:")
@@ -69,6 +75,4 @@ for root, dirs, files in os.walk(args.library, topdown=False):
 				genre_lookup[album] = genre
 			else:
 				tag_edit.edit_genre(path, genre_lookup[album])	
-
-
 
