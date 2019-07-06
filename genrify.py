@@ -16,7 +16,15 @@ def get_genre_choice(genres, prompt=""):
 		print(f"[{i}]: {choice}")
 	print(f"[{len(genres) + 1}]: Tag manually")
 	
-	choice = int(input(" > "))
+	choice = input(" > ")
+	if choice:
+		try:
+			choice = int(choice)
+		except:
+			return get_genre_choice(genres, prompt="Invalid input!")
+	else:
+		choice = 1
+
 	if choice == len(genres) + 1:
 		return get_manual_genre_input("Tag this album manually:")
 	else:
@@ -24,7 +32,11 @@ def get_genre_choice(genres, prompt=""):
 
 def get_manual_genre_input(prompt):
 	print(prompt)
-	return str(input(" > "))
+	choice = input(" > ")
+	if choice:
+		return str(choice)
+	else:
+		return get_manual_genre_input("Genre can't be empty.")
 
 def genrify(path):
 	artist, _, album = tag_edit.get_current_data(path)
