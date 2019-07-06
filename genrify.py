@@ -9,7 +9,8 @@ import last_data
 def is_mp3_file(f):
 	return magic.from_file(f, mime=True) == "audio/mpeg"
 
-def get_genre_choice(genres):
+def get_genre_choice(genres, prompt=""):
+	if prompt: print(prompt)
 	# start numbering at one for better friendliness
 	for i, choice in enumerate(genres, 1):
 		print(f"[{i}]: {choice}")
@@ -17,12 +18,12 @@ def get_genre_choice(genres):
 	
 	choice = int(input(" > "))
 	if choice == len(genres) + 1:
-		print("Tag this album manually:")
-		return get_manual_genre_input()
+		return get_manual_genre_input("Tag this album manually:")
 	else:
 		return genres[choice - 1] # account for indexing
 
-def get_manual_genre_input():
+def get_manual_genre_input(prompt):
+	print(prompt)
 	return str(input(" > "))
 
 def genrify(path):
@@ -47,15 +48,14 @@ def genrify(path):
 
 			if args.interactive:
 				print()
-				print(f"Choose a genre for {artist} - {album}:")
-				genre = get_genre_choice(genres)
+				prompt = f"Choose a genre for {artist} - {album}:"
+				genre = get_genre_choice(genres, prompt=prompt)
 			else:
 				genre = genres[0] 
 
 		else:
 			# skip last.fm query and get manual input
-			print(f"Choose a genre for {artist} - {album}:")
-			genre = get_manual_genre_input()
+			genre = get_manual_genre_input(f"Choose a genre for {artist} - {album}:")
 
 		tag_edit.edit_genre(path, genre)
 		genre_lookup[album] = genre
@@ -75,7 +75,7 @@ print(args)
 
 def main():
 	if os.path.isdir(args.library):
-		for root, dirs, files in os.walk(args.library, topdown=False):
+		for root, _, files in os.walk(args.library, topdown=False):
 			for name in files:
 				path = os.path.join(root, name)
 				if is_mp3_file(path):
