@@ -6,6 +6,9 @@ import magic
 import tag_edit
 import last_data
 
+def is_music_file(f):
+	return "audio" in magic.from_file(f, mime=True)
+
 def is_mp3_file(f):
 	return magic.from_file(f, mime=True) == "audio/mpeg"
 
@@ -41,7 +44,18 @@ def get_manual_genre_input(prompt):
 	else:
 		return get_manual_genre_input("Genre can't be empty.")
 
-def genrify(path, get_current_data, edit_genre):
+def genrify(path):
+
+	if is_mp3_file(path):
+		get_current_data = tag_edit.get_current_data_mp3
+		edit_genre = tag_edit.edit_genre_mp3
+	elif is_flac_file(path):
+		get_current_data = tag_edit.get_current_data_flac
+		edit_genre = tag_edit.edit_genre_flac
+	else:
+		print(f"{path} not a supported music format. Skipping...")
+		return
+
 	artist, _, album = get_current_data(path)
 	name = os.path.basename(path)
 	# skip this file if it is missing necessary tags
@@ -89,27 +103,14 @@ args = parser.parse_args()
 print(args)
 
 def main():
-
 	if os.path.isdir(args.library):
 		for root, _, files in os.walk(args.library, topdown=False):
 			for name in files:
 				path = os.path.join(root, name)
-				if is_mp3_file(path):
-					genrify(path,
-							tag_edit.get_current_data_mp3,
-							tag_edit.edit_genre_mp3)
-				if is_flac_file(path):
-					genrify(path,
-							tag_edit.get_current_data_flac,
-							tag_edit.edit_genre_flac)
+				if is_music_file(path):
+					genrify(path)
 	else:
-		if is_mp3_file(args.library):
-			genrify(args.library,
-					tag_edit.get_current_data_mp3,
-					tag_edit.edit_genre_mp3)
-		if is_flac_file(args.library):
-			genrify(args.library,
-					tag_edit.get_current_data_flac,
-					tag_edit.edit_genre_flac)
+		if is_music_file(args.library):
+			genrify(args.library)
 
 main()
