@@ -94,10 +94,14 @@ def genrify(path):
 genre_lookup = {}
 
 parser = argparse.ArgumentParser(description="Genre setter")
-parser.add_argument("library")
-parser.add_argument("--interactive", "-i", action="store_true")
-parser.add_argument("--nolastfm", "-n", action="store_true")
-parser.add_argument("--limit", "-l", type=int)
+parser.add_argument("library",
+		help="path to a music file or directory containing music files")
+parser.add_argument("--interactive", "-i", action="store_true", 
+		help="interactively choose genre to use")
+parser.add_argument("--nolastfm", "-n", action="store_true",
+		help="skip the last.fm query")
+parser.add_argument("--limit", "-l", type=int,
+		help="set the number of genres to choose from in interactive mode")
 args = parser.parse_args()
 
 print(args)
