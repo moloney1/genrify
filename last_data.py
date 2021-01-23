@@ -1,18 +1,19 @@
+import os
 import argparse
 import pprint
 
 import requests
 
-from creds.creds import apikey
-
 BASE_URL = "http://ws.audioscrobbler.com/2.0/"
 
 pp = pprint.PrettyPrinter(indent=4)
 
+APIKEY = os.environ.get('LASTFM_API_KEY')
+
 def base_request():
     payload =  {
         "method": "album.gettoptags",
-        "api_key" : apikey,
+        "api_key" : APIKEY,
         "format": "json",
         "autocorrect": 1
     }
@@ -25,8 +26,8 @@ def get_top_tags(artist, album, limit=5):
     "artist": artist,
     "album": album
     })
-    req = requests.get(BASE_URL, params=payload)
-    data = req.json()
+    res = _send_request(BASE_URL, params=payload)
+    data = res.json()
     if "error" in data:
         print(f"Error finding tags for {artist}-{album}: {data['message']}")
         return None
@@ -37,6 +38,13 @@ def get_top_tags(artist, album, limit=5):
         tags.append(toptags[i]["name"].title()) # return in Title Case
     return tags
 
+def _send_request(*args, **kwargs):
+    if not APIKEY:
+        raise EnvironmentError(
+                'last.fm api key required in LASTFM_API_KEY environment variable'
+        )
+    return requests.get(*args, **kwargs)
+ 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Top tags")
     parser.add_argument("artist")
