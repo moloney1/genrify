@@ -14,7 +14,7 @@ This tool uses the [mutagen](https://mutagen.readthedocs.io/en/latest/) library 
 
 ## Usage
 
-For now get a last.fm API key and put it into a creds/creds.py file.
+For now get a last.fm API key and load it into your environment as LASTFM_API_KEY
 
 ```
 python genrify.py [-h] [--interactive] [--nolastfm] [--limit LIMIT] library
