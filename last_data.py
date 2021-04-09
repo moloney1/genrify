@@ -9,10 +9,11 @@ APIKEY = os.environ.get('LASTFM_API_KEY')
 
 pp = pprint.PrettyPrinter(indent=4)
 
+
 def base_request():
-    payload =  {
+    payload = {
         "method": "album.gettoptags",
-        "api_key" : APIKEY,
+        "api_key": APIKEY,
         "format": "json",
         "autocorrect": 1
     }
@@ -34,16 +35,19 @@ def get_top_tags(artist, album, limit=5):
     limit = min(len(toptags), limit)
     tags = []
     for i in range(0, limit):
-        tags.append(toptags[i]["name"].title()) # return in Title Case
+        tags.append(toptags[i]["name"].title())  # return in Title Case
     return tags
+
 
 def _send_get_request(*args, **kwargs):
     if not APIKEY:
         raise EnvironmentError(
-                'last.fm api key required in LASTFM_API_KEY environment variable'
+                'last.fm api key required in '
+                'LASTFM_API_KEY environment variable'
         )
     return requests.get(*args, **kwargs)
- 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Top tags")
     parser.add_argument("artist")
@@ -52,4 +56,3 @@ if __name__ == "__main__":
 
     tags = get_top_tags(args.artist, args.album)
     print(tags)
-

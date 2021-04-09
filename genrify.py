@@ -7,6 +7,7 @@ import magic
 import tag_edit
 import last_data
 
+
 def is_music_file(f):
     return "audio" in magic.from_file(f, mime=True)
 
@@ -20,7 +21,8 @@ def is_flac_file(f):
 
 
 def get_genre_choice(genres, prompt=""):
-    if prompt: print(prompt)
+    if prompt:
+        print(prompt)
     # start numbering at one for better friendliness
     for i, choice in enumerate(genres, 1):
         print(f"[{i}]: {choice}")
@@ -30,7 +32,7 @@ def get_genre_choice(genres, prompt=""):
     if choice:
         try:
             choice = int(choice)
-        except:
+        except Exception:
             return get_genre_choice(genres, prompt="Invalid input!")
     else:
         choice = 1
@@ -38,7 +40,7 @@ def get_genre_choice(genres, prompt=""):
     if choice == len(genres) + 1:
         return get_manual_genre_input("Tag this album manually:")
     else:
-        return genres[choice - 1] # account for indexing
+        return genres[choice - 1]  # account for indexing
 
 
 def get_manual_genre_input(prompt):
@@ -48,6 +50,7 @@ def get_manual_genre_input(prompt):
         return str(choice)
     else:
         return get_manual_genre_input("Genre can't be empty.")
+
 
 def genrify(path):
 
@@ -64,19 +67,19 @@ def genrify(path):
     artist, _, album = get_current_data(path)
     name = os.path.basename(path)
     # skip this file if it is missing necessary tags
-    if artist == None or album == None:
+    if None in (artist, album):
         print(f"Skipping {name} due to missing essential information.")
         return
 
-    if not album in genre_lookup:
+    if album not in genre_lookup:
         if not args.nolastfm:
-            # limit how many selections to display 
+            # limit how many selections to display
             # only relevant for interactive mode
             limit = 5 if not args.limit else args.limit
             # get top tags from last.fm
             genres = last_data.get_top_tags(artist, album, limit=limit)
 
-            if genres == None or not genres:
+            if not genres:
                 print(f"Skipping {name}: no tags available")
                 return
 
@@ -85,31 +88,42 @@ def genrify(path):
                 prompt = f"Choose a genre for {artist} - {album}:"
                 genre = get_genre_choice(genres, prompt=prompt)
             else:
-                genre = genres[0] 
+                genre = genres[0]
 
         else:
-			# skip last.fm query and get manual input
-            genre = get_manual_genre_input(f"Choose a genre for {artist} - {album}:")
+            # skip last.fm query and get manual input
+            genre = get_manual_genre_input(
+                    f"Choose a genre for {artist} - {album}:"
+                    )
 
         edit_genre(path, genre)
         genre_lookup[album] = genre
     else:
-        edit_genre(path, genre_lookup[album])	
+        edit_genre(path, genre_lookup[album])
+
 
 genre_lookup = {}
 
 parser = argparse.ArgumentParser(description="Genre setter")
-parser.add_argument("library",
-        help="path to a music file or directory containing music files")
-parser.add_argument("--interactive", "-i", action="store_true", 
-        help="interactively choose genre to use")
-parser.add_argument("--nolastfm", "-n", action="store_true",
-        help="skip the last.fm query")
-parser.add_argument("--limit", "-l", type=int,
-        help="set the number of genres to choose from in interactive mode")
-args = parser.parse_args()
+parser.add_argument(
+        "library",
+        help="path to a music file or directory containing music files"
+        )
 
+parser.add_argument("--interactive", "-i", action="store_true",
+                    help="interactively choose genre to use")
+
+parser.add_argument("--nolastfm", "-n", action="store_true",
+                    help="skip the last.fm query")
+
+parser.add_argument(
+        "--limit", "-l", type=int,
+        help="set the number of genres to choose from in interactive mode"
+        )
+
+args = parser.parse_args()
 print(args)
+
 
 def main():
     if os.path.isdir(args.library):
@@ -121,5 +135,6 @@ def main():
     else:
         if is_music_file(args.library):
             genrify(args.library)
+
 
 main()
