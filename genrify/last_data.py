@@ -4,7 +4,7 @@ import pprint
 
 import requests
 
-BASE_URL = "http://ws.audioscrobbler.com/2.0/"
+BASE_URL = os.environ.get("LASTFM_URL",  "http://ws.audioscrobbler.com/2.0/")
 APIKEY = os.environ.get('LASTFM_API_KEY')
 
 pp = pprint.PrettyPrinter(indent=4)

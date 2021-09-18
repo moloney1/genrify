@@ -1,0 +1,75 @@
+{
+    "toptags": {
+        "tag": [
+            {
+                "count": 100,
+                "name": "math rock",
+                "url": "https://www.last.fm/tag/math+rock"
+            },
+            {
+                "count": 100,
+                "name": "emo",
+                "url": "https://www.last.fm/tag/emo"
+            },
+            {
+                "count": 50,
+                "name": "indie rock",
+                "url": "https://www.last.fm/tag/indie+rock"
+            },
+            {
+                "count": 50,
+                "name": "2008",
+                "url": "https://www.last.fm/tag/2008"
+            },
+            {
+                "count": 25,
+                "name": "indie",
+                "url": "https://www.last.fm/tag/indie"
+            },
+            {
+                "count": 25,
+                "name": "chill",
+                "url": "https://www.last.fm/tag/chill"
+            },
+            {
+                "count": 25,
+                "name": "Progressive rock",
+                "url": "https://www.last.fm/tag/Progressive+rock"
+            },
+            {
+                "count": 25,
+                "name": "prog",
+                "url": "https://www.last.fm/tag/prog"
+            },
+            {
+                "count": 25,
+                "name": "amazing",
+                "url": "https://www.last.fm/tag/amazing"
+            },
+            {
+                "count": 25,
+                "name": "00s",
+                "url": "https://www.last.fm/tag/00s"
+            },
+            {
+                "count": 25,
+                "name": "boogie on down",
+                "url": "https://www.last.fm/tag/boogie+on+down"
+            },
+            {
+                "count": 25,
+                "name": "emo prog",
+                "url": "https://www.last.fm/tag/emo+prog"
+            },
+            {
+                "count": 25,
+                "name": "favourite album from artist",
+                "url": "https://www.last.fm/tag/favourite+album+from+artist"
+            }
+        ],
+        "@attr": {
+            "artist": "TTNG",
+            "album": "Animals"
+        }
+    }
+}

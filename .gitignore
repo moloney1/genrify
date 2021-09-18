@@ -5,6 +5,5 @@ TestAlbum/
 .trash/
 .bu/
 .vscode/
-*.mp3
 *.flac
 *.pdf

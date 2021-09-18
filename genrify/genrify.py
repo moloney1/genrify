@@ -137,4 +137,5 @@ def main():
             genrify(args.library)
 
 
-main()
+if __name__ == '__main__':
+    main()
