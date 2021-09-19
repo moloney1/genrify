@@ -1,3 +1,6 @@
+"""
+This module contains functional test cases for the genrify CLI
+"""
 import os
 import subprocess
 
@@ -15,12 +18,19 @@ os.environ["LASTFM_API_KEY"] = "your_api_key"
 
 @pytest.fixture(scope="module", autouse=True)
 def mock_lastfm_server():
+    """
+    Fixture used to start the mock last.fm server before
+    running any tests. Kill the server on test finish.
+    """
     server = subprocess.Popen(["python", MOCK_SERVER_PATH])
     yield
     subprocess.Popen(["kill", str(server.pid)])
 
 
-def test_ping():
+def test_help():
+    """
+    Test for help command
+    """
     print("=" * 40)
     cmd = [
         GENRIFY_PATH,
@@ -32,13 +42,16 @@ def test_ping():
         stdout=subprocess.PIPE
     )
     out, _ = p.communicate()
-    decoded = get_decoded_out(out)
+    decoded = _get_decoded_out(out)
     print(decoded)
     assert any(line for line in decoded if "usage" in line)
     print("=" * 40)
 
 
 def test_library_no_flags():
+    """
+    Test for passing music library with no optional args
+    """
     print("=" * 40)
     cmd = [GENRIFY_PATH, TEST_LIBRARY_PATH]
     print("Testing cmd: ", cmd)
@@ -47,7 +60,7 @@ def test_library_no_flags():
         stdout=subprocess.PIPE
     )
     out, _ = p.communicate()
-    decoded = get_decoded_out(out)
+    decoded = _get_decoded_out(out)
     print(decoded)
     assert any(
         line for line in decoded
@@ -57,7 +70,10 @@ def test_library_no_flags():
     print("=" * 40)
 
 
-def test_single_song_interactive(limit=3):
+def test_single_song_interactive():
+    """
+    Test for passing single song in interactive mode
+    """
     print("=" * 40)
     cmd = [
         GENRIFY_PATH,
@@ -71,13 +87,17 @@ def test_single_song_interactive(limit=3):
         stdin=subprocess.PIPE
     )
     out, _ = p.communicate(input=b"2")
-    decoded = get_decoded_out(out)
+    decoded = _get_decoded_out(out)
     print(decoded)
     assert any([line for line in decoded if "Emo" in line])
     print("=" * 40)
 
 
 def test_single_song_interactive_custom(limit=1):
+    """
+    Test for passing single song in interactive mode,
+    select manual genre input
+    """
     print("=" * 40)
     cmd = [
         GENRIFY_PATH,
@@ -93,11 +113,14 @@ def test_single_song_interactive_custom(limit=1):
         stdin=subprocess.PIPE
     )
     out, _ = p.communicate(input=b"2\nasdf")
-    decoded = get_decoded_out(out)
+    decoded = _get_decoded_out(out)
     print(decoded)
     assert any([line for line in decoded if "genre changed" in line])
     print("=" * 40)
 
 
-def get_decoded_out(out):
+def _get_decoded_out(out):
+    """
+    Helper for decoding stdout/stderr from bytes
+    """
     return [line.decode("utf-8") for line in out.splitlines()]
