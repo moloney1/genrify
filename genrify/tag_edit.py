@@ -1,83 +1,140 @@
 import warnings
+from abc import ABC, abstractmethod
+
+from magic import from_file
 
 import mutagen.mp3
 import mutagen.flac
 
 
-def edit_genre_mp3(mp3file, genre):
-    # param mp3file - path of mp3file
-    # param genre - str containing genre to edit to
-    artist, title, _ = get_current_data_mp3(mp3file)
-    md = mutagen.mp3.EasyMP3(mp3file)
-
-    try:
-        cur_gen = md.tags["genre"][0]
-        if cur_gen == genre:
-            print(f"{artist}-{title} already tagged {genre}. No action taken")
+class MusicFile(ABC):
+    @staticmethod
+    def factory(filepath):
+        """
+        Return an instance of the appropriate subclass
+        based on filetype, or None if the file is not
+        a music file or is an unsupported music file
+        """
+        mime = from_file(filepath, mime=True)
+        if "audio" not in mime:
+            return None
+        if mime == "audio/mpeg":
+            return MP3File(filepath)
+        elif "flac" in mime:
+            return FLACFile(filepath)
         else:
-            md.tags["genre"] = genre
-            print(f"{artist}-{title}: genre changed from {cur_gen} to {genre}")
-    except Exception:
-        md.tags["genre"] = genre
-        print(f"No genre found for {artist}-{title}. Added genre tag: {genre}")
-    md.save()
+            print(f"{filepath} unsupported filetype {mime}")
+            return None
+
+    @abstractmethod
+    def get_current_data(self):
+        """
+        Get current artist, title and album tags as a tuple
+        :return: (artist, title, album)
+        :rtype: tuple
+        """
+        pass
+
+    @abstractmethod
+    def edit_genre(self, genre):
+        """
+        Edit the music file's genre tag to 'genre'
+
+        :param genre: desired genre
+        :type genre: str
+        """
+        pass
 
 
-def edit_genre_flac(flacfile, genre):
-    # tags are stored as list of tuples e.g. [("artist","whatever"),...]
-    # FLAC field names are case insensitive
-    # FLAC also allows for multiple genres but assume only one for now
-    artist, title, _ = get_current_data_flac(flacfile)
-    md = mutagen.flac.FLAC(flacfile)
+class MP3File(MusicFile):
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.md = mutagen.mp3.EasyMP3(self.filepath)
 
-    cur_gen = ""
-    # check the current genre
-    for tag in md.tags:
-        if tag[0].upper() == "GENRE":
-            cur_gen = tag[1]
-            md.tags.remove(tag)
+    def get_current_data(self):
+        try:
+            return (
+                self.md.tags["artist"][0],
+                self.md.tags["title"][0],
+                self.md.tags["album"][0]
+            )
+        except Exception:
+            warnings.warn(f"File {self.filepath} is missing tags.")
+            return (None, None, None)
 
-    if cur_gen:
-        if cur_gen == genre:
-            print(f"{artist}-{title} already tagged {genre}. No action taken")
-        else:
-            print(f"{artist}-{title}: genre changed from {cur_gen} to {genre}")
-    else:
-        print(f"No genre found for {artist}-{title}. Added genre tag: {genre}")
-    md.tags.append(("GENRE", genre))
+    def edit_genre(self, genre):
+        artist, title, _ = self.get_current_data()
+        try:
+            current_genre = self.md.tags["genre"][0]
+            if genre == current_genre:
+                print(
+                    f"{artist}-{title} already tagged {genre}. "
+                    "No action taken"
+                )
+            else:
+                self.md.tags["genre"] = genre
+                print(
+                    f"{artist}-{title}: genre changed from "
+                    f"{current_genre} to {genre}"
+                )
+        except Exception:
+            self.md.tags["genre"] = genre
+            print(
+                f"No genre found for {artist}-{title}. "
+                f"Added genre tag: {genre}"
+            )
+        self.md.save()
 
-    md.save()
 
+class FLACFile(MusicFile):
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.md = mutagen.flac.FLAC(filepath)
 
-def get_current_data_mp3(mp3file):
-    # take file path as param instead of EasyMP3 object
-    # so that we can give appropriate warning on failure
-    md = mutagen.mp3.EasyMP3(mp3file)
-    try:
-        return (md.tags["artist"][0],
-                md.tags["title"][0],
-                md.tags["album"][0])
-    except Exception:
-        warnings.warn(f"File {mp3file} is missing tags.")
-        return (None, None, None)
-
-
-def get_current_data_flac(flacfile):
-    md = mutagen.flac.FLAC(flacfile)
-    # dict comp to convert all keys to uppercase
-    tags_dict = {key.upper(): value for key, value in dict(md.tags).items()}
-    try:
-        return (tags_dict["ARTIST"][0],
+    def get_current_data(self):
+        tags_dict = {
+            key.upper(): value
+            for key, value
+            in dict(self.md.tags).items()
+        }
+        try:
+            return (
+                tags_dict["ARTIST"][0],
                 tags_dict["TITLE"][0],
-                tags_dict["ALBUM"][0])
-    except Exception:
-        warnings.warn(f"File {flacfile} is missing tags.")
-        return (None, None, None)
+                tags_dict["ALBUM"][0]
+            )
+        except Exception:
+            warnings.warn(f"File {self.filepath} is missing tags.")
+            return (None, None, None)
 
+    def edit_genre(self, genre):
+        artist, title, _ = self.get_current_data()
+        current_genre = ""
+        # check the current genre
+        for tag in self.md.tags:
+            if tag[0].upper() == "GENRE":
+                current_genre = tag[1]
+                self.md.tags.remove(tag)
 
-def dump_tags(mp3file):
-    md = mutagen.mp3.EasyMP3(mp3file)
-    print(md.tags)
+        if current_genre:
+            if current_genre == genre:
+                print(
+                    f"{artist}-{title} already tagged {genre}. "
+                    "No action taken"
+                )
+            else:
+                print(
+                    f"{artist}-{title}: genre changed from "
+                    f"{current_genre} to {genre}"
+                )
+        else:
+            print(
+                f"No genre found for {artist}-{title}. "
+                f"Added genre tag: {genre}"
+            )
+
+        self.md.tags.append(("GENRE", genre))
+        self.md.save()
 
 
 if __name__ == "__main__":
@@ -87,5 +144,5 @@ if __name__ == "__main__":
     # md = mutagen.mp3.EasyMP3("TestAlbum/Gone.mp3")
     # print(get_current_data(md))
     # print(get_current_data_flac(sys.argv[1]))
-    edit_genre_mp3('./test.mp3', 'ass')
-    print(get_current_data_mp3('./test.mp3'))
+    mp3 = MP3File("../tests/test_data/music/animals.mp3")
+    print(mp3)
