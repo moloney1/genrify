@@ -1,13 +1,23 @@
 import os
 import subprocess
 
+from mock_lastfm import start_server
+
 GENRIFY_PATH = "../genrify/genrify.py"
 TEST_LIBRARY_PATH = "./test_data/music"
+MOCK_SERVER_PATH = "./mock_lastfm.py"
 songs = ["animals.mp3"]
 
 
-os.environ["LASTFM_URL"] = 'http://localhost:8252'
+os.environ["LASTFM_URL"] = "http://localhost:8252"
+os.environ["LASTFM_API_KEY"] = "your_api_key"
 
+def start_mock_lastfm_server():
+    cmd = ["python", MOCK_SERVER_PATH]
+    return subprocess.Popen(cmd)
+
+def stop_mock_lastfm_server(server):
+    subprocess.Popen(["kill", str(server.pid)])
 
 def ping():
     print("=" * 40)
@@ -93,7 +103,9 @@ def get_decoded_out(out):
 
 
 if __name__ == '__main__':
+    server = start_mock_lastfm_server()
     ping()
     library_no_flags()
     single_song_interactive_custom()
     single_song_interactive(limit=3)
+    stop_mock_lastfm_server(server)

@@ -21,7 +21,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response_json).encode())
         return
 
+def start_server():
+    server = HTTPServer(("localhost", 8252), RequestHandler)
+    print("starting server on localhost:8252")
+    server.serve_forever()
 
-server = HTTPServer(("localhost", 8252), RequestHandler)
-print("starting server on localhost:8252")
-server.serve_forever()
+if __name__ == '__main__':
+    start_server()
+
