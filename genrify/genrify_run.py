@@ -2,8 +2,7 @@
 import os
 import argparse
 
-import tag_edit
-import last_data
+from .lib import tag_edit, last_data
 
 
 def get_genre_choice(genres, prompt=""):
@@ -113,7 +112,6 @@ def main():
                 genrify(path)
     else:
         genrify(args.library)
-
 
 if __name__ == '__main__':
     main()
